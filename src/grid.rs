@@ -79,14 +79,14 @@ pub fn generate_grid(grid_size: usize) -> Grid {
         ];
 
         let mut colors = vec![
-            Color::new(0.0, 1.0, 0.0, 1.0),   // Neon Green
-            Color::new(1.0, 0.0, 1.0, 1.0),   // Neon Magenta
-            Color::new(0.0, 1.0, 1.0, 1.0),   // Neon Cyan
-            Color::new(1.0, 1.0, 0.0, 1.0),   // Neon Yellow
-            Color::new(1.0, 0.5, 0.0, 1.0),   // Neon Orange
-            Color::new(0.5, 0.0, 1.0, 1.0),   // Neon Purple
-            Color::new(1.0, 0.0, 0.5, 1.0),   // Neon Pink
-            Color::new(0.0, 0.5, 1.0, 1.0)    // Neon Blue
+            Color::new(0.0, 1.0, 0.0, 1.0), // Neon Green
+            Color::new(1.0, 0.0, 1.0, 1.0), // Neon Magenta
+            Color::new(0.0, 1.0, 1.0, 1.0), // Neon Cyan
+            Color::new(1.0, 1.0, 0.0, 1.0), // Neon Yellow
+            Color::new(1.0, 0.5, 0.0, 1.0), // Neon Orange
+            Color::new(0.5, 0.0, 1.0, 1.0), // Neon Purple
+            Color::new(1.0, 0.0, 0.5, 1.0), // Neon Pink
+            Color::new(0.0, 0.5, 1.0, 1.0)  // Neon Blue
         ];
 
         dirs.shuffle(&mut rng);
