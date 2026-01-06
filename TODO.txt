@@ -1,0 +1,4 @@
+TODO:
+    - add hours into format_time (functions.rs)
+    - make a Game ended screen to show the result and save it into a scoreboard file (main.rs)
+    
