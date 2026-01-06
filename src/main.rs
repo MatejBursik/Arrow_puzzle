@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-use macroquad::ui::{root_ui, widgets};
+use macroquad::ui::{hash, root_ui, widgets};
 
 mod grid;
 mod arrow;
@@ -19,14 +19,21 @@ async fn main() {
     const MENU_BUTTON_WIDTH: f32 = 200.0;
     const MENU_BUTTON_HEIGHT: f32 = 40.0;
 
+    let mut timer_mode_duration: f32 = 30.0;
+    let mut timer_input_buffer = timer_mode_duration.to_string();
+
     let mut game_state = GameState::MainMenu;
 
+    let font_size = 32.0;
     let mut grid = generate_grid(GRID_SIZE);
     let mut points: u32 = 0;
+    let mut health: i32 = 0;
+    let mut timer: f32 = 1.0;
 
     loop {
         clear_background(Color::new(0.1, 0.1, 0.1, 1.0));
 
+        let dt = get_frame_time();
         let screen_w = screen_width();
         let screen_h = screen_height();
         let offset = grid_offset(GRID_SIZE, CELL_SIZE, screen_w, screen_h, NAV_BAR_HEIGHT);
@@ -39,12 +46,16 @@ async fn main() {
                 if widgets::Button::new("Survival").position(vec2(button_x, screen_h * 0.2)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     grid = generate_grid(GRID_SIZE);
                     points = 0;
+                    health = 3;
+                    timer = 1.0;
                     game_state = GameState::PlayingSurvival;
                 }
 
                 if widgets::Button::new("Timer").position(vec2(button_x, screen_h * 0.3)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     grid = generate_grid(GRID_SIZE);
                     points = 0;
+                    health = 1;
+                    timer = timer_mode_duration;
                     game_state = GameState::PlayingTimer;
                 }
 
@@ -72,29 +83,65 @@ async fn main() {
 
             GameState::Settings => {
                 // Settings Window
-                println!("Settings Window");
+                draw_text("Timer Duration (min: 5 sec.)", (screen_w / 2.0) - 180.0, (screen_h * 0.45) + font_size / 2.5, font_size, WHITE);
+
+                widgets::InputText::new(hash!("timer_input"))
+                    .position(vec2(screen_w / 2.0 - 100.0, screen_h * 0.5))
+                    .size(vec2(200.0, 32.0))
+                    .ui(&mut root_ui(), &mut timer_input_buffer);
+
+                if widgets::Button::new("Apply").position(vec2(button_x, screen_h * 0.7)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                    if let Ok(value) = timer_input_buffer.parse::<f32>() {
+                        timer_mode_duration = if value < 5.0 {
+                            5.0
+                        } else {
+                            value
+                        }
+                    }
+
+                    timer_mode_duration = (timer_mode_duration / 5.0).round() * 5.0;
+                    timer_input_buffer = format!("{:.0}", timer_mode_duration);
+                    
+                    game_state = GameState::MainMenu;
+                }
 
                 if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                    timer_input_buffer = format!("{:.0}", timer_mode_duration);
+                    
                     game_state = GameState::MainMenu;
                 }
             }
 
             GameState::PlayingSurvival | GameState::PlayingTimer => {
                 // Gameplay Window
-                if let Some((x, y)) = cell_from_mouse(GRID_SIZE, CELL_SIZE, offset) {
-                    if can_remove(&grid, x, y, GRID_SIZE) {
-                        grid[y][x] = None;
-                        points += 1;
-                    }
-                }
-                
-                draw_arrow_grid(&grid, GRID_SIZE, CELL_SIZE, offset);
-                draw_nav_bar(points, screen_w, NAV_BAR_HEIGHT, &mut game_state);
-                
                 if grid_is_empty(&grid) {
                     if draw_regenerate_button(screen_w, screen_h) == Some(true) {
                         grid = generate_grid(GRID_SIZE);
                     }
+                } else {
+                    if let Some((x, y)) = cell_from_mouse(GRID_SIZE, CELL_SIZE, offset) {
+                        if can_remove(&grid, x, y, GRID_SIZE) {
+                            grid[y][x] = None;
+                            points += 1;
+                        } else if game_state == GameState::PlayingTimer {
+                            println!("pass");
+                        } else {
+                            health -= 1;
+                        }
+                    }
+                }
+
+                if game_state == GameState::PlayingTimer {
+                    timer -= dt;
+                }
+                
+                draw_arrow_grid(&grid, GRID_SIZE, CELL_SIZE, offset);
+                draw_nav_bar(points, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
+
+                if health <= 0 || timer <= 0.0 {
+                    println!("Game ended");
+                    // make a Game ended screen to show the result and save it into a scoreboard file
+                    game_state = GameState::MainMenu;
                 }
             }
         }

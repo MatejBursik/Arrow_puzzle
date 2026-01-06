@@ -28,7 +28,7 @@ pub fn cell_from_mouse(grid_size: usize, cell_size: f32, offset: Vec2) -> Option
 pub fn can_remove(grid: &Grid, x: usize, y: usize, grid_size: usize) -> bool {
     let arrow = match &grid[y][x] {
         Some(a) => a,
-        None => return false,
+        None => return false
     };
 
     match arrow.dir {
@@ -75,10 +75,10 @@ pub fn draw_regenerate_button(screen_w: f32, screen_h: f32) -> Option<bool> {
     let x = (screen_w - button_width) / 2.0;
     let y = (screen_h - button_height) / 2.0;
 
-    let mouse = vec2(mouse_position().0, mouse_position().1);
+    let (mx, my) = mouse_position();
     let hovered =
-        mouse.x >= x && mouse.x <= x + button_width &&
-        mouse.y >= y && mouse.y <= y + button_height;
+        mx >= x && mx <= x + button_width &&
+        my >= y && my <= y + button_height;
 
     let color = if hovered { LIGHTGRAY } else { GRAY };
     let text = "New Grid";
@@ -96,19 +96,47 @@ pub fn draw_regenerate_button(screen_w: f32, screen_h: f32) -> Option<bool> {
     None
 }
 
-pub fn draw_nav_bar(points: u32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
+fn format_time(seconds: f32) -> String {
+    let secs = seconds.max(0.0) as i32;
+    let minutes = secs / 60;
+    let seconds = secs % 60;
+
+    format!("{:02}:{:02}", minutes, seconds)
+}
+
+pub fn draw_nav_bar(points: u32, health :i32, timer: f32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
+    let font_size = 32.0;
+    let button_width = 90.0;
+    let button_height = 32.0;
+    let mut center_text_color = WHITE;
+    
     draw_rectangle(0.0, 0.0, screen_w, nav_bar_height, BLACK);
 
     // Points (left)
     let points_text = format!("Points: {}", points);
-    let font_size = 32.0;
-
+    
     draw_text(&points_text, 20.0, nav_bar_height / 2.0 + font_size / 2.5, font_size, WHITE);
 
-    // Back button (right)
-    let button_width = 90.0;
-    let button_height = 32.0;
+    // Timer / Health (center)
+    let center_text: String;
 
+    if *game_state == GameState::PlayingSurvival {
+        center_text = format!("Health: {}", health);
+        if health <= 1 {
+            center_text_color = RED;
+        }
+    } else if *game_state == GameState::PlayingTimer {
+        if timer < 6.0 {
+            center_text_color = RED;
+        }
+        center_text = format!("Timer: {}", format_time(timer));
+    } else {
+        center_text = "".to_string();
+    }
+
+    draw_text(&center_text, (screen_w / 2.0) - button_width, nav_bar_height / 2.0 + font_size / 2.5, font_size, center_text_color);
+
+    // Back button (right)
     if widgets::Button::new("Back").position(vec2(screen_w - button_width - 20.0, nav_bar_height / 2.0 - button_height / 2.0)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
         *game_state = GameState::MainMenu;
     }
