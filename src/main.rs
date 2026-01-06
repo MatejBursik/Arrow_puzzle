@@ -26,7 +26,7 @@ async fn main() {
 
     let font_size = 32.0;
     let mut grid = generate_grid(GRID_SIZE);
-    let mut points: u32 = 0;
+    let mut score: u32 = 0;
     let mut health: i32 = 0;
     let mut timer: f32 = 1.0;
 
@@ -45,7 +45,7 @@ async fn main() {
                 // Main Menu Window
                 if widgets::Button::new("Survival").position(vec2(button_x, screen_h * 0.2)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     grid = generate_grid(GRID_SIZE);
-                    points = 0;
+                    score = 0;
                     health = 3;
                     timer = 1.0;
                     game_state = GameState::PlayingSurvival;
@@ -53,7 +53,7 @@ async fn main() {
 
                 if widgets::Button::new("Timer").position(vec2(button_x, screen_h * 0.3)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     grid = generate_grid(GRID_SIZE);
-                    points = 0;
+                    score = 0;
                     health = 1;
                     timer = timer_mode_duration;
                     game_state = GameState::PlayingTimer;
@@ -122,9 +122,9 @@ async fn main() {
                     if let Some((x, y)) = cell_from_mouse(GRID_SIZE, CELL_SIZE, offset) {
                         if can_remove(&grid, x, y, GRID_SIZE) {
                             grid[y][x] = None;
-                            points += 1;
+                            score += 1;
                         } else if game_state == GameState::PlayingTimer {
-                            println!("pass");
+                            println!("");
                         } else {
                             health -= 1;
                         }
@@ -136,10 +136,10 @@ async fn main() {
                 }
                 
                 draw_arrow_grid(&grid, GRID_SIZE, CELL_SIZE, offset);
-                draw_nav_bar(points, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
+                draw_nav_bar(score, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
 
                 if health <= 0 || timer <= 0.0 {
-                    println!("Game ended");
+                    println!("Game ended | Score: {score}");
                     // make a Game ended screen to show the result and save it into a scoreboard file
                     game_state = GameState::MainMenu;
                 }

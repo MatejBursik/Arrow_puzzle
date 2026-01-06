@@ -104,7 +104,7 @@ fn format_time(seconds: f32) -> String {
     format!("{:02}:{:02}", minutes, seconds)
 }
 
-pub fn draw_nav_bar(points: u32, health :i32, timer: f32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
+pub fn draw_nav_bar(score: u32, health :i32, timer: f32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
     let font_size = 32.0;
     let button_width = 90.0;
     let button_height = 32.0;
@@ -112,10 +112,10 @@ pub fn draw_nav_bar(points: u32, health :i32, timer: f32, screen_w: f32, nav_bar
     
     draw_rectangle(0.0, 0.0, screen_w, nav_bar_height, BLACK);
 
-    // Points (left)
-    let points_text = format!("Points: {}", points);
+    // Score (left)
+    let score_text = format!("Score: {}", score);
     
-    draw_text(&points_text, 20.0, nav_bar_height / 2.0 + font_size / 2.5, font_size, WHITE);
+    draw_text(&score_text, 20.0, nav_bar_height / 2.0 + font_size / 2.5, font_size, WHITE);
 
     // Timer / Health (center)
     let center_text: String;
