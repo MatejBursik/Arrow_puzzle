@@ -1,4 +1,8 @@
 TODO:
     - add hours into format_time (functions.rs)
     - make a Game ended screen to show the result and save it into a scoreboard file (main.rs)
-    
+    - implement file save system for settings and scoreboard
+    - make ui skin
+    - animate arrows sliding out
+    - add sound fx
+    - think about implementing score multiplier (streak, grids completed)
