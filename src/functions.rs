@@ -1,6 +1,8 @@
 use macroquad::prelude::*;
+use macroquad::ui::{root_ui, widgets};
 
 use crate::grid::*;
+use crate::gamestate::GameState;
 
 pub fn cell_from_mouse(grid_size: usize, cell_size: f32, offset: Vec2) -> Option<(usize, usize)> {
     if !is_mouse_button_pressed(MouseButton::Left) {
@@ -94,8 +96,20 @@ pub fn draw_regenerate_button(screen_w: f32, screen_h: f32) -> Option<bool> {
     None
 }
 
-pub fn draw_nav_bar(points: u32, screen_width: f32, nav_bar_height: f32) {
-    draw_rectangle(0.0, 0.0, screen_width, nav_bar_height, BLACK);
+pub fn draw_nav_bar(points: u32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
+    draw_rectangle(0.0, 0.0, screen_w, nav_bar_height, BLACK);
 
-    draw_text(&format!("Points: {}", points), 20.0, 45.0, 32.0, WHITE);
+    // Points (left)
+    let points_text = format!("Points: {}", points);
+    let font_size = 32.0;
+
+    draw_text(&points_text, 20.0, nav_bar_height / 2.0 + font_size / 2.5, font_size, WHITE);
+
+    // Back button (right)
+    let button_width = 90.0;
+    let button_height = 32.0;
+
+    if widgets::Button::new("Back").position(vec2(screen_w - button_width - 20.0, nav_bar_height / 2.0 - button_height / 2.0)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
+        *game_state = GameState::MainMenu;
+    }
 }
