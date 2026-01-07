@@ -6,3 +6,8 @@ pub enum GameState {
     PlayingSurvival,
     PlayingTimer
 }
+
+pub enum GameEndAction {
+    Restart,
+    MainMenu
+}

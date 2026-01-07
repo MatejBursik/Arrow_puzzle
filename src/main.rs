@@ -9,7 +9,7 @@ mod gamestate;
 use grid::*;
 use arrow::*;
 use functions::*;
-use gamestate::GameState;
+use gamestate::*;
 
 #[macroquad::main("Arrow Puzzle")]
 async fn main() {
@@ -26,7 +26,7 @@ async fn main() {
 
     let font_size = 32.0;
     let mut grid = generate_grid(GRID_SIZE);
-    let mut score: u32 = 0;
+    let mut score: i32 = 0;
     let mut health: i32 = 0;
     let mut timer: f32 = 1.0;
 
@@ -139,9 +139,21 @@ async fn main() {
                 draw_nav_bar(score, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
 
                 if health <= 0 || timer <= 0.0 {
-                    println!("Game ended | Score: {score}");
-                    // make a Game ended screen to show the result and save it into a scoreboard file
-                    game_state = GameState::MainMenu;
+                    // save it into a scoreboard file
+                    if let Some(action) = draw_game_end_screen(screen_w, screen_h, score) {
+                        match action {
+                            GameEndAction::Restart => {
+                                grid = generate_grid(GRID_SIZE);
+                                score = 0;
+                                health = 3;
+                                timer = timer_mode_duration;
+                            }
+
+                            GameEndAction::MainMenu => {
+                                game_state = GameState::MainMenu;
+                            }
+                        }
+                    }
                 }
             }
         }

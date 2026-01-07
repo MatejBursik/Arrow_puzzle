@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 use macroquad::ui::{root_ui, widgets};
 
 use crate::grid::*;
-use crate::gamestate::GameState;
+use crate::gamestate::*;
 
 pub fn cell_from_mouse(grid_size: usize, cell_size: f32, offset: Vec2) -> Option<(usize, usize)> {
     if !is_mouse_button_pressed(MouseButton::Left) {
@@ -80,17 +80,73 @@ pub fn draw_regenerate_button(screen_w: f32, screen_h: f32) -> Option<bool> {
         mx >= x && mx <= x + button_width &&
         my >= y && my <= y + button_height;
 
-    let color = if hovered { LIGHTGRAY } else { GRAY };
     let text = "New Grid";
     let font_size = 30.0;
     let text_dims = measure_text(text, None, font_size as u16, 1.0);
 
     draw_rectangle(0.0, 0.0, screen_w, screen_h, Color::new(0.0,0.0,0.0,0.4));
-    draw_rectangle(x, y, button_width, button_height, color);
+    draw_rectangle(x, y, button_width, button_height, if hovered { LIGHTGRAY } else { GRAY });
     draw_text(text, x + (button_width - text_dims.width) / 2.0, y + (button_height + text_dims.height) / 2.0 - 4.0, font_size, BLACK);
 
     if hovered && is_mouse_button_pressed(MouseButton::Left) {
         return Some(true);
+    }
+
+    None
+}
+
+pub fn draw_game_end_screen(screen_w: f32, screen_h: f32, score: i32) -> Option<GameEndAction> {
+    let button_width = 220.0;
+    let button_height = 50.0;
+    let spacing = 20.0;
+    let center_x = screen_w / 2.0;
+
+    let (mx, my) = mouse_position();
+
+    draw_rectangle(0.0, 0.0, screen_w, screen_h, Color::new(0.0,0.0,0.0,0.6));
+
+    // Score
+    let score_text = format!("Final Score: {}", score);
+    let score_size = 32.0;
+    let score_dims = measure_text(&score_text, None, score_size as u16, 1.0);
+
+    draw_text(&score_text, center_x - score_dims.width / 2.0, screen_h * 0.4, score_size, LIGHTGRAY);
+    
+    // Restart button
+    let restart_x = center_x - button_width / 2.0;
+    let restart_y = screen_h * 0.5;
+
+    let restart_hovered =
+        mx >= restart_x && mx <= restart_x + button_width &&
+        my >= restart_y && my <= restart_y + button_height;
+
+    draw_rectangle(restart_x, restart_y, button_width, button_height, if restart_hovered { LIGHTGRAY } else { GRAY });
+
+    let restart_text = "Restart";
+    let restart_dims = measure_text(restart_text, None, 30, 1.0);
+
+    draw_text(restart_text, restart_x + (button_width - restart_dims.width) / 2.0, restart_y + 34.0, 30.0, BLACK);
+
+    if restart_hovered && is_mouse_button_pressed(MouseButton::Left) {
+        return Some(GameEndAction::Restart);
+    }
+
+    // Main menu button
+    let menu_y = restart_y + button_height + spacing;
+
+    let menu_hovered =
+        mx >= restart_x && mx <= restart_x + button_width &&
+        my >= menu_y && my <= menu_y + button_height;
+
+    draw_rectangle(restart_x, menu_y, button_width, button_height, if menu_hovered { LIGHTGRAY } else { GRAY });
+
+    let menu_text = "Main Menu";
+    let menu_dims = measure_text(menu_text, None, 30, 1.0);
+
+    draw_text(menu_text, restart_x + (button_width - menu_dims.width) / 2.0, menu_y + 34.0, 30.0, BLACK);
+
+    if menu_hovered && is_mouse_button_pressed(MouseButton::Left) {
+        return Some(GameEndAction::MainMenu);
     }
 
     None
@@ -104,7 +160,7 @@ fn format_time(seconds: f32) -> String {
     format!("{:02}:{:02}", minutes, seconds)
 }
 
-pub fn draw_nav_bar(score: u32, health :i32, timer: f32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
+pub fn draw_nav_bar(score: i32, health :i32, timer: f32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
     let font_size = 32.0;
     let button_width = 90.0;
     let button_height = 32.0;
@@ -137,7 +193,9 @@ pub fn draw_nav_bar(score: u32, health :i32, timer: f32, screen_w: f32, nav_bar_
     draw_text(&center_text, (screen_w / 2.0) - button_width, nav_bar_height / 2.0 + font_size / 2.5, font_size, center_text_color);
 
     // Back button (right)
-    if widgets::Button::new("Back").position(vec2(screen_w - button_width - 20.0, nav_bar_height / 2.0 - button_height / 2.0)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
-        *game_state = GameState::MainMenu;
+    if !(health <= 0 || timer <= 0.0) {
+        if widgets::Button::new("Back").position(vec2(screen_w - button_width - 20.0, nav_bar_height / 2.0 - button_height / 2.0)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
+            *game_state = GameState::MainMenu;
+        }
     }
 }
