@@ -1,2 +1,5 @@
 /target
 Cargo.lock
+
+scoreboard.json
+settings.json

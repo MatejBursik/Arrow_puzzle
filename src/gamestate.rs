@@ -7,6 +7,7 @@ pub enum GameState {
     PlayingTimer
 }
 
+#[derive(PartialEq)]
 pub enum GameEndAction {
     Restart,
     MainMenu

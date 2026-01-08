@@ -1,11 +1,13 @@
 use macroquad::prelude::*;
 use macroquad::ui::{hash, root_ui, widgets};
 
+mod file;
 mod grid;
 mod arrow;
 mod functions;
 mod gamestate;
 
+use file::*;
 use grid::*;
 use arrow::*;
 use functions::*;
@@ -19,7 +21,12 @@ async fn main() {
     const MENU_BUTTON_WIDTH: f32 = 200.0;
     const MENU_BUTTON_HEIGHT: f32 = 40.0;
 
-    let mut timer_mode_duration: f32 = 30.0;
+    let settings: SettingsFile = match read_json("settings.json") {
+        Ok(f) => f,
+        Err(_) => { SettingsFile { timer_mode_duration: 30.0 }} // Provide default settings
+    };
+
+    let mut timer_mode_duration: f32 = settings.timer_mode_duration;
     let mut timer_input_buffer = timer_mode_duration.to_string();
 
     let mut game_state = GameState::MainMenu;
@@ -101,6 +108,11 @@ async fn main() {
 
                     timer_mode_duration = (timer_mode_duration / 5.0).round() * 5.0;
                     timer_input_buffer = format!("{:.0}", timer_mode_duration);
+
+                    match write_json("settings.json", &SettingsFile { timer_mode_duration: timer_mode_duration }) {
+                        Ok(_) => { println!("Settings saved") },
+                        Err(e) => { println!("{:?}", e) }
+                    };
                     
                     game_state = GameState::MainMenu;
                 }
@@ -139,8 +151,32 @@ async fn main() {
                 draw_nav_bar(score, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
 
                 if health <= 0 || timer <= 0.0 {
-                    // save it into a scoreboard file
                     if let Some(action) = draw_game_end_screen(screen_w, screen_h, score) {
+                        let gamemode: String;
+                        let time: f32;
+
+                        match game_state {
+                            GameState::PlayingSurvival => {
+                                gamemode = "Survival".to_string();
+                                time = timer; // Stopwatch
+                            }
+
+                            GameState::PlayingTimer => {
+                                gamemode = "Timer".to_string();
+                                time = timer_mode_duration; // Timer duration
+                            }
+
+                            _ => {
+                                gamemode = "Unknown".to_string();
+                                time = 0.0;
+                            }
+                        };
+                        
+                        match append_to_scoreboard("scoreboard.json", SaveData { gamemode, time: time, score }) {
+                            Ok(_) => println!("Score saved"),
+                            Err(e) => println!("{:?}", e)
+                        }
+
                         match action {
                             GameEndAction::Restart => {
                                 grid = generate_grid(GRID_SIZE);
