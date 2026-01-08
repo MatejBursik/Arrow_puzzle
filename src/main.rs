@@ -54,7 +54,7 @@ async fn main() {
                     grid = generate_grid(GRID_SIZE);
                     score = 0;
                     health = 3;
-                    timer = 1.0;
+                    timer = 0.0001;
                     game_state = GameState::PlayingSurvival;
                 }
 
@@ -143,9 +143,14 @@ async fn main() {
                     }
                 }
 
-                if game_state == GameState::PlayingTimer {
-                    timer -= dt;
+                if !(health <= 0 || timer <= 0.0) {
+                    if game_state == GameState::PlayingTimer {
+                        timer -= dt;
+                    } else if game_state == GameState::PlayingSurvival {
+                        timer += dt;
+                    }
                 }
+                println!("{:?}", timer);
                 
                 draw_arrow_grid(&grid, GRID_SIZE, CELL_SIZE, offset);
                 draw_nav_bar(score, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
@@ -182,7 +187,11 @@ async fn main() {
                                 grid = generate_grid(GRID_SIZE);
                                 score = 0;
                                 health = 3;
-                                timer = timer_mode_duration;
+                                timer = if game_state == GameState::PlayingTimer {
+                                    timer_mode_duration
+                                } else {
+                                    0.0001
+                                }
                             }
 
                             GameEndAction::MainMenu => {

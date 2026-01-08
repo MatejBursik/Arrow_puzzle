@@ -1,5 +1,4 @@
 TODO:
-    - add stopwatch for survival
     - make the scoreboard screen (add datetime to the saved data)
     - make ui skin (make all buttons work on the same system)
     - animate arrows sliding out
