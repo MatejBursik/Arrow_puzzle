@@ -17,7 +17,7 @@ pub struct SaveData {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SaveFile {
-    games_saved: Vec<SaveData>
+    pub games_saved: Vec<SaveData>
 }
 
 pub fn write_json<T: Serialize>(file_name: &str, data: &T) -> Result<()> {

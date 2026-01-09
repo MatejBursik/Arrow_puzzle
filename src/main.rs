@@ -24,19 +24,20 @@ async fn main() {
 
     let settings: SettingsFile = match read_json("settings.json") {
         Ok(f) => f,
-        Err(_) => { SettingsFile { timer_mode_duration: 30.0 }} // Provide default settings
+        Err(_) => { SettingsFile { timer_mode_duration: 30.0 } } // Provide default settings
     };
-
-    let mut timer_mode_duration: f32 = settings.timer_mode_duration;
-    let mut timer_input_buffer = timer_mode_duration.to_string();
 
     let mut game_state = GameState::MainMenu;
 
-    let font_size = 32.0;
+    let mut scoreboard: SaveFile = SaveFile { games_saved: Vec::new() };
     let mut grid = generate_grid(GRID_SIZE);
     let mut score: i32 = 0;
     let mut health: i32 = 0;
     let mut timer: f32 = 1.0;
+    let mut timer_mode_duration: f32 = settings.timer_mode_duration;
+    let mut timer_input_buffer = timer_mode_duration.to_string();
+    let font_size = 32.0;
+    let mut first_row: usize = 0;
 
     loop {
         clear_background(Color::new(0.1, 0.1, 0.1, 1.0));
@@ -47,6 +48,10 @@ async fn main() {
         let offset = grid_offset(GRID_SIZE, CELL_SIZE, screen_w, screen_h, NAV_BAR_HEIGHT);
 
         let button_x = (screen_w - MENU_BUTTON_WIDTH) / 2.0;
+        let table_x = screen_w / 8.0;
+        let table_y = screen_h / 8.0;
+        let table_width = screen_w - ((screen_w / 8.0) * 2.0);
+        let table_height = screen_h / 1.6;
 
         match game_state {
             GameState::MainMenu => {
@@ -68,6 +73,12 @@ async fn main() {
                 }
 
                 if widgets::Button::new("Scoreboard").position(vec2(button_x, screen_h * 0.4)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                    first_row = 0;
+                    scoreboard = match read_json("scoreboard.json") {
+                        Ok(f) => f,
+                        Err(_) => { SaveFile { games_saved: Vec::new() } }
+                    };
+                    
                     game_state = GameState::Scoreboard;
                 }
 
@@ -82,7 +93,7 @@ async fn main() {
 
             GameState::Scoreboard => {
                 // Scoreboard Window
-                println!("Scoreboard Window");
+                draw_scrollable_table(table_x, table_y, table_width, table_height, &scoreboard.games_saved, &mut first_row);
 
                 if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     game_state = GameState::MainMenu;

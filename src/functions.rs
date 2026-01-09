@@ -3,6 +3,7 @@ use macroquad::ui::{root_ui, widgets};
 
 use crate::grid::*;
 use crate::gamestate::*;
+use crate::file::SaveData;
 
 pub fn cell_from_mouse(grid_size: usize, cell_size: f32, offset: Vec2) -> Option<(usize, usize)> {
     if !is_mouse_button_pressed(MouseButton::Left) {
@@ -198,4 +199,56 @@ pub fn draw_nav_bar(score: i32, health :i32, timer: f32, screen_w: f32, nav_bar_
             *game_state = GameState::MainMenu;
         }
     }
+}
+
+pub fn draw_scrollable_table(x: f32, y: f32, width: f32, height: f32, rows: &[SaveData], first_row: &mut usize) {
+    const ROW_HEIGHT: f32 = 26.0;
+    const HEADER_HEIGHT: f32 = 30.0;
+
+    let (mx, my) = mouse_position();
+
+    let visible_rows = ((height - HEADER_HEIGHT) / ROW_HEIGHT).floor() as usize;
+    let max_first_row = rows.len().saturating_sub(visible_rows);
+
+    if mx >= x && mx <= x + width && my >= y && my <= y + height {
+        let (_, wheel) = mouse_wheel();
+
+        if wheel != 0.0 {
+            if wheel > 0.0 {
+                *first_row = first_row.saturating_sub(1);
+            } else {
+                *first_row = (*first_row + 1).min(max_first_row);
+            }
+        }
+    }
+
+    // Header
+    draw_rectangle(x, y, width, HEADER_HEIGHT, DARKBLUE);
+
+    draw_text("ID", x + 10.0, y + 20.0, 20.0, WHITE);
+    draw_text("Gamemode", x + 10.0 + (width * 0.1), y + 20.0, 20.0, WHITE);
+    draw_text("Time", x + 10.0 + (width * 0.3), y + 20.0, 20.0, WHITE);
+    draw_text("Score", x + 10.0 + (width * 0.5), y + 20.0, 20.0, WHITE);
+    draw_text("Datetime", x + 10.0 + (width * 0.7), y + 20.0, 20.0, WHITE);
+
+    // Draw visible rows only
+    for i in 0..visible_rows {
+        let row_index = *first_row + i;
+        let row_y = y + HEADER_HEIGHT + i as f32 * ROW_HEIGHT;
+
+        let hovered =
+            mx >= x && mx <= x + width &&
+            my >= row_y && my <= row_y + ROW_HEIGHT;
+
+        draw_rectangle(x, row_y, width, ROW_HEIGHT, if hovered { DARKGRAY } else { GRAY });
+
+        draw_text(&row_index.to_string(), x + 10.0, row_y + 18.0, 18.0, WHITE);
+        draw_text(&rows[row_index].gamemode, x + 10.0 + (width * 0.1), row_y + 18.0, 18.0, WHITE);
+        draw_text(&format!("{:.2}", &rows[row_index].time), x + 10.0 + (width * 0.3), row_y + 18.0, 18.0, WHITE);
+        draw_text(&rows[row_index].score.to_string(), x + 10.0 + (width * 0.5), row_y + 18.0, 18.0, WHITE);
+        draw_text(&rows[row_index].datetime, x + 10.0 + (width * 0.7), row_y + 18.0, 18.0, WHITE);
+    }
+
+    // Disable scissor
+    set_default_camera();
 }

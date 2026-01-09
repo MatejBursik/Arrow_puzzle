@@ -1,5 +1,4 @@
 TODO:
-    - make the scoreboard screen
     - make ui skin (make all buttons work on the same system)
     - animate arrows sliding out
     - add sound fx
