@@ -138,24 +138,24 @@ async fn main() {
 
             GameState::PlayingSurvival | GameState::PlayingTimer => {
                 // Gameplay Window
-                if grid_is_empty(&grid) {
-                    if draw_regenerate_button(screen_w, screen_h) == Some(true) {
-                        grid = generate_grid(GRID_SIZE);
-                    }
-                } else {
-                    if let Some((x, y)) = cell_from_mouse(GRID_SIZE, CELL_SIZE, offset) {
-                        if can_remove(&grid, x, y, GRID_SIZE) {
-                            grid[y][x] = None;
-                            score += 1;
-                        } else if game_state == GameState::PlayingTimer {
-                            
-                        } else {
-                            health -= 1;
+                if !(health <= 0 || timer <= 0.0) {
+                    if grid_is_empty(&grid) {
+                        if draw_regenerate_button(screen_w, screen_h) == Some(true) {
+                            grid = generate_grid(GRID_SIZE);
+                        }
+                    } else {
+                        if let Some((x, y)) = cell_from_mouse(GRID_SIZE, CELL_SIZE, offset) {
+                            if can_remove(&grid, x, y, GRID_SIZE) {
+                                grid[y][x] = None;
+                                score += 1;
+                            } else if game_state == GameState::PlayingTimer {
+                                
+                            } else {
+                                health -= 1;
+                            }
                         }
                     }
-                }
-
-                if !(health <= 0 || timer <= 0.0) {
+                    
                     if game_state == GameState::PlayingTimer {
                         timer -= dt;
                     } else if game_state == GameState::PlayingSurvival {

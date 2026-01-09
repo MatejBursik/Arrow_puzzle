@@ -3,7 +3,4 @@ TODO:
     - animate arrows sliding out
     - add sound fx
     - think about implementing score multiplier (streak, grids completed)
-
-BUG:
-    - player is able to click arrows (get higher score) while in the game end screen
     
