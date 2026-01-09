@@ -11,7 +11,8 @@ pub struct SettingsFile {
 pub struct SaveData {
     pub gamemode: String,
     pub time: f32,
-    pub score: i32
+    pub score: i32,
+    pub datetime: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]

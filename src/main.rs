@@ -1,5 +1,6 @@
 use macroquad::prelude::*;
 use macroquad::ui::{hash, root_ui, widgets};
+use chrono::Local;
 
 mod file;
 mod grid;
@@ -136,7 +137,7 @@ async fn main() {
                             grid[y][x] = None;
                             score += 1;
                         } else if game_state == GameState::PlayingTimer {
-                            println!("");
+                            
                         } else {
                             health -= 1;
                         }
@@ -150,7 +151,6 @@ async fn main() {
                         timer += dt;
                     }
                 }
-                println!("{:?}", timer);
                 
                 draw_arrow_grid(&grid, GRID_SIZE, CELL_SIZE, offset);
                 draw_nav_bar(score, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
@@ -177,7 +177,7 @@ async fn main() {
                             }
                         };
                         
-                        match append_to_scoreboard("scoreboard.json", SaveData { gamemode, time: time, score }) {
+                        match append_to_scoreboard("scoreboard.json", SaveData { gamemode, time, score, datetime: Local::now().format("%d-%m-%Y %H:%M:%S").to_string() }) {
                             Ok(_) => println!("Score saved"),
                             Err(e) => println!("{:?}", e)
                         }
