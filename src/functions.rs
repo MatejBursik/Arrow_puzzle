@@ -76,20 +76,9 @@ pub fn draw_regenerate_button(screen_w: f32, screen_h: f32) -> Option<bool> {
     let x = (screen_w - button_width) / 2.0;
     let y = (screen_h - button_height) / 2.0;
 
-    let (mx, my) = mouse_position();
-    let hovered =
-        mx >= x && mx <= x + button_width &&
-        my >= y && my <= y + button_height;
-
-    let text = "New Grid";
-    let font_size = 30.0;
-    let text_dims = measure_text(text, None, font_size as u16, 1.0);
-
     draw_rectangle(0.0, 0.0, screen_w, screen_h, Color::new(0.0,0.0,0.0,0.4));
-    draw_rectangle(x, y, button_width, button_height, if hovered { LIGHTGRAY } else { GRAY });
-    draw_text(text, x + (button_width - text_dims.width) / 2.0, y + (button_height + text_dims.height) / 2.0 - 4.0, font_size, BLACK);
 
-    if hovered && is_mouse_button_pressed(MouseButton::Left) {
+    if widgets::Button::new("New Grid").position(vec2(x, y)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
         return Some(true);
     }
 
@@ -101,8 +90,6 @@ pub fn draw_game_end_screen(screen_w: f32, screen_h: f32, score: i32) -> Option<
     let button_height = 50.0;
     let spacing = 20.0;
     let center_x = screen_w / 2.0;
-
-    let (mx, my) = mouse_position();
 
     draw_rectangle(0.0, 0.0, screen_w, screen_h, Color::new(0.0,0.0,0.0,0.6));
 
@@ -117,36 +104,14 @@ pub fn draw_game_end_screen(screen_w: f32, screen_h: f32, score: i32) -> Option<
     let restart_x = center_x - button_width / 2.0;
     let restart_y = screen_h * 0.5;
 
-    let restart_hovered =
-        mx >= restart_x && mx <= restart_x + button_width &&
-        my >= restart_y && my <= restart_y + button_height;
-
-    draw_rectangle(restart_x, restart_y, button_width, button_height, if restart_hovered { LIGHTGRAY } else { GRAY });
-
-    let restart_text = "Restart";
-    let restart_dims = measure_text(restart_text, None, 30, 1.0);
-
-    draw_text(restart_text, restart_x + (button_width - restart_dims.width) / 2.0, restart_y + 34.0, 30.0, BLACK);
-
-    if restart_hovered && is_mouse_button_pressed(MouseButton::Left) {
+    if widgets::Button::new("Restart").position(vec2(restart_x, restart_y)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
         return Some(GameEndAction::Restart);
     }
 
     // Main menu button
     let menu_y = restart_y + button_height + spacing;
 
-    let menu_hovered =
-        mx >= restart_x && mx <= restart_x + button_width &&
-        my >= menu_y && my <= menu_y + button_height;
-
-    draw_rectangle(restart_x, menu_y, button_width, button_height, if menu_hovered { LIGHTGRAY } else { GRAY });
-
-    let menu_text = "Main Menu";
-    let menu_dims = measure_text(menu_text, None, 30, 1.0);
-
-    draw_text(menu_text, restart_x + (button_width - menu_dims.width) / 2.0, menu_y + 34.0, 30.0, BLACK);
-
-    if menu_hovered && is_mouse_button_pressed(MouseButton::Left) {
+    if widgets::Button::new("Main Menu").position(vec2(restart_x, menu_y)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
         return Some(GameEndAction::MainMenu);
     }
 

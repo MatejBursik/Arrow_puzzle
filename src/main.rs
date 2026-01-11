@@ -2,12 +2,14 @@ use macroquad::prelude::*;
 use macroquad::ui::{hash, root_ui, widgets};
 use chrono::Local;
 
+mod ui;
 mod file;
 mod grid;
 mod arrow;
 mod functions;
 mod gamestate;
 
+use ui::skin_loader::*;
 use file::*;
 use grid::*;
 use arrow::*;
@@ -38,6 +40,10 @@ async fn main() {
     let mut timer_input_buffer = timer_mode_duration.to_string();
     let font_size = 32.0;
     let mut first_row: usize = 0;
+
+    let skin_loader = SkinLoader::new();
+    let skin = skin_loader.await.get_skin();
+    root_ui().push_skin(&skin);
 
     loop {
         clear_background(Color::new(0.1, 0.1, 0.1, 1.0));
