@@ -1,6 +1,7 @@
 use macroquad::prelude::*;
 use macroquad::ui::{root_ui, widgets};
 
+use crate::audio::Audio;
 use crate::grid::*;
 use crate::gamestate::*;
 use crate::file::SaveData;
@@ -126,7 +127,7 @@ fn format_time(seconds: f32) -> String {
     format!("{:02}:{:02}", minutes, seconds)
 }
 
-pub fn draw_nav_bar(score: i32, health :i32, timer: f32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState) {
+pub fn draw_nav_bar(score: i32, health :i32, timer: f32, screen_w: f32, nav_bar_height: f32, game_state: &mut GameState, audio: &mut Audio) {
     let font_size = 32.0;
     let button_width = 90.0;
     let button_height = 32.0;
@@ -161,6 +162,7 @@ pub fn draw_nav_bar(score: i32, health :i32, timer: f32, screen_w: f32, nav_bar_
     // Back button (right)
     if !(health <= 0 || timer <= 0.0) {
         if widgets::Button::new("Back").position(vec2(screen_w - button_width - 20.0, nav_bar_height / 2.0 - button_height / 2.0)).size(vec2(button_width, button_height)).ui(&mut root_ui()) {
+            audio.play_button();
             *game_state = GameState::MainMenu;
         }
     }

@@ -1,11 +1,10 @@
 TODO:
-    - animate arrows sliding out
-    *- add sound fx (Kira crate)
+    - add sound background music
     - update ui assets
     - think about implementing score multiplier (streak, grids completed)
     - think about adding different difficulties
     - add setting:
-        - on/off sound effects
+        - on/off sound fx
+        - on/off music
         - crud username
-        - on/off animations
     

@@ -4,6 +4,7 @@ use chrono::Local;
 
 mod ui;
 mod file;
+mod audio;
 mod grid;
 mod arrow;
 mod functions;
@@ -11,6 +12,7 @@ mod gamestate;
 
 use ui::skin_loader::*;
 use file::*;
+use audio::Audio;
 use grid::*;
 use arrow::*;
 use functions::*;
@@ -24,6 +26,7 @@ async fn main() {
     const MENU_BUTTON_WIDTH: f32 = 200.0;
     const MENU_BUTTON_HEIGHT: f32 = 40.0;
 
+    let mut audio: Audio = Audio::new().expect("Failed to initialize audio");
     let settings: SettingsFile = match read_json("settings.json") {
         Ok(f) => f,
         Err(_) => { SettingsFile { timer_mode_duration: 30.0 } } // Provide default settings
@@ -67,6 +70,8 @@ async fn main() {
                     score = 0;
                     health = 3;
                     timer = 0.0001;
+                    
+                    audio.play_button();
                     game_state = GameState::PlayingSurvival;
                 }
 
@@ -75,6 +80,8 @@ async fn main() {
                     score = 0;
                     health = 1;
                     timer = timer_mode_duration;
+
+                    audio.play_button();
                     game_state = GameState::PlayingTimer;
                 }
 
@@ -85,10 +92,12 @@ async fn main() {
                         Err(_) => { SaveFile { games_saved: Vec::new() } }
                     };
                     
+                    audio.play_button();
                     game_state = GameState::Scoreboard;
                 }
 
                 if widgets::Button::new("Settings").position(vec2(button_x, screen_h * 0.5)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                    audio.play_button();
                     game_state = GameState::Settings;
                 }
 
@@ -102,6 +111,7 @@ async fn main() {
                 draw_scrollable_table(table_x, table_y, table_width, table_height, &scoreboard.games_saved, &mut first_row);
 
                 if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                    audio.play_button();
                     game_state = GameState::MainMenu;
                 }
             }
@@ -132,12 +142,14 @@ async fn main() {
                         Err(e) => { println!("{:?}", e) }
                     };
                     
+                    audio.play_button();
                     game_state = GameState::MainMenu;
                 }
 
                 if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     timer_input_buffer = format!("{:.0}", timer_mode_duration);
                     
+                    audio.play_button();
                     game_state = GameState::MainMenu;
                 }
             }
@@ -155,9 +167,10 @@ async fn main() {
                                 grid[y][x] = None;
                                 score += 1;
                             } else if game_state == GameState::PlayingTimer {
-                                
+                                audio.play_mistake();
                             } else {
                                 health -= 1;
+                                audio.play_mistake();
                             }
                         }
                     }
@@ -167,10 +180,14 @@ async fn main() {
                     } else if game_state == GameState::PlayingSurvival {
                         timer += dt;
                     }
+
+                    if health <= 0 || timer <= 0.0 {
+                        audio.play_success();
+                    }
                 }
                 
                 draw_arrow_grid(&grid, GRID_SIZE, CELL_SIZE, offset);
-                draw_nav_bar(score, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state);
+                draw_nav_bar(score, health, timer, screen_w, NAV_BAR_HEIGHT, &mut game_state, &mut audio);
 
                 if health <= 0 || timer <= 0.0 {
                     if let Some(action) = draw_game_end_screen(screen_w, screen_h, score) {
@@ -208,10 +225,13 @@ async fn main() {
                                     timer_mode_duration
                                 } else {
                                     0.0001
-                                }
+                                };
+
+                                audio.play_button();
                             }
 
                             GameEndAction::MainMenu => {
+                                audio.play_button();
                                 game_state = GameState::MainMenu;
                             }
                         }
