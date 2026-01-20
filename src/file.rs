@@ -4,7 +4,8 @@ use std::io::{BufReader, Write, Result};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SettingsFile {
-    pub timer_mode_duration: f32
+    pub timer_mode_duration: f32,
+    pub sound_fx: bool
 }
 
 #[derive(Serialize, Deserialize, Debug)]

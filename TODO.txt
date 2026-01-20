@@ -4,7 +4,6 @@ TODO:
     - think about implementing score multiplier (streak, grids completed)
     - think about adding different difficulties
     - add setting:
-        - on/off sound fx
         - on/off music
         - crud username
     

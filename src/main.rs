@@ -26,11 +26,17 @@ async fn main() {
     const MENU_BUTTON_WIDTH: f32 = 200.0;
     const MENU_BUTTON_HEIGHT: f32 = 40.0;
 
-    let mut audio: Audio = Audio::new().expect("Failed to initialize audio");
     let settings: SettingsFile = match read_json("settings.json") {
         Ok(f) => f,
-        Err(_) => { SettingsFile { timer_mode_duration: 30.0 } } // Provide default settings
+        Err(_) => { // Provide default settings
+            SettingsFile {
+                timer_mode_duration: 30.0,
+                sound_fx: false
+            }
+        }
     };
+    let mut audio: Audio = Audio::new(settings.sound_fx).expect("Failed to initialize audio");
+    let mut sound_fx_input: bool = audio.sound_fx;
 
     let mut game_state = GameState::MainMenu;
 
@@ -118,28 +124,35 @@ async fn main() {
 
             GameState::Settings => {
                 // Settings Window
-                draw_text("Timer Duration (min: 5 sec.)", (screen_w / 2.0) - 180.0, (screen_h * 0.45) + font_size / 2.5, font_size, WHITE);
+                draw_text("Timer Duration (min: 5 sec.)", (screen_w / 2.0) - 180.0, (screen_h * 0.35) + font_size / 2.5, font_size, WHITE);
 
                 widgets::InputText::new(hash!("timer_input"))
-                    .position(vec2(screen_w / 2.0 - 100.0, screen_h * 0.5))
+                    .position(vec2(screen_w / 2.0 - 100.0, screen_h * 0.4))
                     .size(vec2(200.0, 32.0))
                     .ui(&mut root_ui(), &mut timer_input_buffer);
 
+                draw_text("Sound FX", (screen_w / 2.0) - 64.0, (screen_h * 0.55) + font_size / 2.5, font_size, WHITE);
+
+                widgets::Checkbox::new(hash!("sound_fx_checkbox"))
+                    .pos(vec2(screen_w / 2.0 + 64.0, (screen_h * 0.55) - font_size - 8.0))
+                    .size(vec2(32.0, 32.0))
+                    .ui(&mut root_ui(), &mut sound_fx_input);
+
                 if widgets::Button::new("Apply").position(vec2(button_x, screen_h * 0.7)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     if let Ok(value) = timer_input_buffer.parse::<f32>() {
-                        timer_mode_duration = if value < 5.0 {
-                            5.0
-                        } else {
-                            value
-                        }
+                        timer_mode_duration = if value < 5.0 { 5.0 } else { value }
                     }
 
                     timer_mode_duration = (timer_mode_duration / 5.0).round() * 5.0;
                     timer_input_buffer = format!("{:.0}", timer_mode_duration);
 
-                    match write_json("settings.json", &SettingsFile { timer_mode_duration: timer_mode_duration }) {
-                        Ok(_) => { println!("Settings saved") },
-                        Err(e) => { println!("{:?}", e) }
+                    audio.sound_fx = sound_fx_input;
+
+                    match write_json("settings.json", &SettingsFile {
+                        timer_mode_duration: timer_mode_duration,
+                        sound_fx: audio.sound_fx}) {
+                            Ok(_) => { println!("Settings saved") },
+                            Err(e) => { println!("{:?}", e) }
                     };
                     
                     audio.play_button();
@@ -148,6 +161,7 @@ async fn main() {
 
                 if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     timer_input_buffer = format!("{:.0}", timer_mode_duration);
+                    sound_fx_input = audio.sound_fx;
                     
                     audio.play_button();
                     game_state = GameState::MainMenu;
