@@ -4,12 +4,14 @@ use std::io::{BufReader, Write, Result};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SettingsFile {
+    pub player_name: String,
     pub timer_mode_duration: f32,
     pub sound_fx: bool
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SaveData {
+    pub player_name: String,
     pub gamemode: String,
     pub time: f32,
     pub score: i32,

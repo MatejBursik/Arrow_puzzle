@@ -30,6 +30,7 @@ async fn main() {
         Ok(f) => f,
         Err(_) => { // Provide default settings
             SettingsFile {
+                player_name: "".to_string(),
                 timer_mode_duration: 30.0,
                 sound_fx: false
             }
@@ -50,6 +51,9 @@ async fn main() {
     let font_size = 32.0;
     let mut first_row: usize = 0;
 
+    let mut player_name = settings.player_name.clone();
+    let mut player_name_input = settings.player_name.clone();
+
     let skin_loader = SkinLoader::new();
     let skin = skin_loader.await.get_skin();
     root_ui().push_skin(&skin);
@@ -63,10 +67,10 @@ async fn main() {
         let offset = grid_offset(GRID_SIZE, CELL_SIZE, screen_w, screen_h, NAV_BAR_HEIGHT);
 
         let button_x = (screen_w - MENU_BUTTON_WIDTH) / 2.0;
-        let table_x = screen_w / 8.0;
-        let table_y = screen_h / 8.0;
-        let table_width = screen_w - ((screen_w / 8.0) * 2.0);
-        let table_height = screen_h / 1.6;
+        let table_x = screen_w * 0.1;
+        let table_y = screen_h * 0.1;
+        let table_width = screen_w - ((screen_w * 0.1) * 2.0);
+        let table_height = screen_h - ((screen_h * 0.1) * 2.0);
 
         match game_state {
             GameState::MainMenu => {
@@ -124,6 +128,13 @@ async fn main() {
 
             GameState::Settings => {
                 // Settings Window
+                draw_text("Player Name", (screen_w / 2.0) - 80.0, (screen_h * 0.2) + font_size / 2.5, font_size, WHITE);
+
+                widgets::InputText::new(hash!("player_name_input"))
+                    .position(vec2(screen_w / 2.0 - 100.0, screen_h * 0.25))
+                    .size(vec2(200.0, 32.0))
+                    .ui(&mut root_ui(), &mut player_name_input);
+
                 draw_text("Timer Duration (min: 5 sec.)", (screen_w / 2.0) - 180.0, (screen_h * 0.35) + font_size / 2.5, font_size, WHITE);
 
                 widgets::InputText::new(hash!("timer_input"))
@@ -147,8 +158,10 @@ async fn main() {
                     timer_input_buffer = format!("{:.0}", timer_mode_duration);
 
                     audio.sound_fx = sound_fx_input;
+                    player_name = player_name_input.clone();
 
                     match write_json("settings.json", &SettingsFile {
+                        player_name: player_name_input.clone(),
                         timer_mode_duration: timer_mode_duration,
                         sound_fx: audio.sound_fx}) {
                             Ok(_) => { println!("Settings saved") },
@@ -162,6 +175,7 @@ async fn main() {
                 if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
                     timer_input_buffer = format!("{:.0}", timer_mode_duration);
                     sound_fx_input = audio.sound_fx;
+                    player_name_input = player_name.clone();
                     
                     audio.play_button();
                     game_state = GameState::MainMenu;
@@ -225,9 +239,14 @@ async fn main() {
                             }
                         };
                         
-                        match append_to_scoreboard("scoreboard.json", SaveData { gamemode, time, score, datetime: Local::now().format("%d-%m-%Y %H:%M:%S").to_string() }) {
-                            Ok(_) => println!("Score saved"),
-                            Err(e) => println!("{:?}", e)
+                        match append_to_scoreboard("scoreboard.json", SaveData {
+                            player_name: player_name.clone(),
+                            gamemode,
+                            time,
+                            score,
+                            datetime: Local::now().format("%d-%m-%Y %H:%M:%S").to_string() }) {
+                                Ok(_) => println!("Score saved"),
+                                Err(e) => println!("{:?}", e)
                         }
 
                         match action {

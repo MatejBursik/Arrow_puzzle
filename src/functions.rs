@@ -174,7 +174,7 @@ pub fn draw_scrollable_table(x: f32, y: f32, width: f32, height: f32, rows: &[Sa
 
     let (mx, my) = mouse_position();
 
-    let visible_rows = ((height - HEADER_HEIGHT) / ROW_HEIGHT).floor() as usize;
+    let visible_rows = (((height - HEADER_HEIGHT) / ROW_HEIGHT).floor() as usize).min(rows.len());
     let max_first_row = rows.len().saturating_sub(visible_rows);
 
     if mx >= x && mx <= x + width && my >= y && my <= y + height {
@@ -193,9 +193,10 @@ pub fn draw_scrollable_table(x: f32, y: f32, width: f32, height: f32, rows: &[Sa
     draw_rectangle(x, y, width, HEADER_HEIGHT, DARKBLUE);
 
     draw_text("ID", x + 10.0, y + 20.0, 20.0, WHITE);
-    draw_text("Gamemode", x + 10.0 + (width * 0.1), y + 20.0, 20.0, WHITE);
-    draw_text("Time", x + 10.0 + (width * 0.3), y + 20.0, 20.0, WHITE);
-    draw_text("Score", x + 10.0 + (width * 0.5), y + 20.0, 20.0, WHITE);
+    draw_text("Player", x + 10.0 + (width * 0.05), y + 20.0, 20.0, WHITE);
+    draw_text("Gamemode", x + 10.0 + (width * 0.2), y + 20.0, 20.0, WHITE);
+    draw_text("Time", x + 10.0 + (width * 0.35), y + 20.0, 20.0, WHITE);
+    draw_text("Score", x + 10.0 + (width * 0.55), y + 20.0, 20.0, WHITE);
     draw_text("Datetime", x + 10.0 + (width * 0.7), y + 20.0, 20.0, WHITE);
 
     // Draw visible rows only
@@ -210,9 +211,10 @@ pub fn draw_scrollable_table(x: f32, y: f32, width: f32, height: f32, rows: &[Sa
         draw_rectangle(x, row_y, width, ROW_HEIGHT, if hovered { DARKGRAY } else { GRAY });
 
         draw_text(&row_index.to_string(), x + 10.0, row_y + 18.0, 18.0, WHITE);
-        draw_text(&rows[row_index].gamemode, x + 10.0 + (width * 0.1), row_y + 18.0, 18.0, WHITE);
-        draw_text(&format!("{:.2}", &rows[row_index].time), x + 10.0 + (width * 0.3), row_y + 18.0, 18.0, WHITE);
-        draw_text(&rows[row_index].score.to_string(), x + 10.0 + (width * 0.5), row_y + 18.0, 18.0, WHITE);
+        draw_text(&rows[row_index].player_name, x + 10.0 + (width * 0.05), row_y + 18.0, 18.0, WHITE);
+        draw_text(&rows[row_index].gamemode, x + 10.0 + (width * 0.2), row_y + 18.0, 18.0, WHITE);
+        draw_text(&format!("{:.2}", &rows[row_index].time), x + 10.0 + (width * 0.35), row_y + 18.0, 18.0, WHITE);
+        draw_text(&rows[row_index].score.to_string(), x + 10.0 + (width * 0.55), row_y + 18.0, 18.0, WHITE);
         draw_text(&rows[row_index].datetime, x + 10.0 + (width * 0.7), row_y + 18.0, 18.0, WHITE);
     }
 
