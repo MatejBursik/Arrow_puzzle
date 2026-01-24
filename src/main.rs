@@ -75,7 +75,7 @@ async fn main() {
         match game_state {
             GameState::MainMenu => {
                 // Main Menu Window
-                if widgets::Button::new("Survival").position(vec2(button_x, screen_h * 0.2)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Survival").position(vec2(button_x, screen_h * 0.2)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     grid = generate_grid(GRID_SIZE);
                     score = 0;
                     health = 3;
@@ -85,7 +85,7 @@ async fn main() {
                     game_state = GameState::PlayingSurvival;
                 }
 
-                if widgets::Button::new("Timer").position(vec2(button_x, screen_h * 0.3)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Timer").position(vec2(button_x, screen_h * 0.3)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     grid = generate_grid(GRID_SIZE);
                     score = 0;
                     health = 1;
@@ -95,7 +95,7 @@ async fn main() {
                     game_state = GameState::PlayingTimer;
                 }
 
-                if widgets::Button::new("Scoreboard").position(vec2(button_x, screen_h * 0.4)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Scoreboard").position(vec2(button_x, screen_h * 0.4)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     first_row = 0;
                     scoreboard = match read_json("scoreboard.json") {
                         Ok(f) => f,
@@ -106,12 +106,12 @@ async fn main() {
                     game_state = GameState::Scoreboard;
                 }
 
-                if widgets::Button::new("Settings").position(vec2(button_x, screen_h * 0.5)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Settings").position(vec2(button_x, screen_h * 0.5)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     audio.play_button();
                     game_state = GameState::Settings;
                 }
 
-                if widgets::Button::new("Quit").position(vec2(button_x, screen_h * 0.6)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Quit").position(vec2(button_x, screen_h * 0.6)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     std::process::exit(0);
                 }
             }
@@ -120,7 +120,7 @@ async fn main() {
                 // Scoreboard Window
                 draw_scrollable_table(table_x, table_y, table_width, table_height, &scoreboard.games_saved, &mut first_row);
 
-                if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     audio.play_button();
                     game_state = GameState::MainMenu;
                 }
@@ -128,28 +128,26 @@ async fn main() {
 
             GameState::Settings => {
                 // Settings Window
-                draw_text("Player Name", (screen_w / 2.0) - 80.0, (screen_h * 0.2) + font_size / 2.5, font_size, WHITE);
+                draw_text("Player Name", (screen_w / 2.0) - 80.0, (screen_h * 0.1) + font_size / 2.5, font_size, WHITE);
 
                 widgets::InputText::new(hash!("player_name_input"))
-                    .position(vec2(screen_w / 2.0 - 100.0, screen_h * 0.25))
+                    .position(vec2(screen_w / 2.0 - 100.0, (screen_h * 0.1) + font_size))
                     .size(vec2(200.0, 32.0))
                     .ui(&mut root_ui(), &mut player_name_input);
 
-                draw_text("Timer Duration (min: 5 sec.)", (screen_w / 2.0) - 180.0, (screen_h * 0.35) + font_size / 2.5, font_size, WHITE);
+                draw_text("Timer Duration (min: 5 sec.)", (screen_w / 2.0) - 180.0, (screen_h * 0.3) + font_size / 2.5, font_size, WHITE);
 
                 widgets::InputText::new(hash!("timer_input"))
-                    .position(vec2(screen_w / 2.0 - 100.0, screen_h * 0.4))
+                    .position(vec2(screen_w / 2.0 - 100.0, screen_h * 0.3))
                     .size(vec2(200.0, 32.0))
                     .ui(&mut root_ui(), &mut timer_input_buffer);
 
-                draw_text("Sound FX", (screen_w / 2.0) - 64.0, (screen_h * 0.55) + font_size / 2.5, font_size, WHITE);
+                if widgets::Button::new(format!("Sound FX - {}", if sound_fx_input { "ON" } else { "OFF" })).position(vec2(button_x, screen_h * 0.5)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
+                    sound_fx_input = !sound_fx_input;
+                    audio.play_button();
+                }
 
-                widgets::Checkbox::new(hash!("sound_fx_checkbox"))
-                    .pos(vec2(screen_w / 2.0 + 64.0, (screen_h * 0.55) - font_size - 8.0))
-                    .size(vec2(32.0, 32.0))
-                    .ui(&mut root_ui(), &mut sound_fx_input);
-
-                if widgets::Button::new("Apply").position(vec2(button_x, screen_h * 0.7)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Apply").position(vec2(button_x, screen_h * 0.7)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     if let Ok(value) = timer_input_buffer.parse::<f32>() {
                         timer_mode_duration = if value < 5.0 { 5.0 } else { value }
                     }
@@ -172,7 +170,7 @@ async fn main() {
                     game_state = GameState::MainMenu;
                 }
 
-                if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui())  {
+                if widgets::Button::new("Back").position(vec2(button_x, screen_h * 0.8)).size(vec2(MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT)).ui(&mut root_ui()) {
                     timer_input_buffer = format!("{:.0}", timer_mode_duration);
                     sound_fx_input = audio.sound_fx;
                     player_name_input = player_name.clone();

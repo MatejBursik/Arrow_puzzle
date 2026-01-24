@@ -5,5 +5,5 @@ TODO:
     - think about adding different difficulties
     - add setting:
         - on/off background music
-        - change sound fx checkbox into a button because centering the checkbox is hell
+        *- change sound fx checkbox into a button because centering the checkbox is hell
     
