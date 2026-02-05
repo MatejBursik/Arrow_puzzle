@@ -11,10 +11,9 @@
 - Try to get the highest possible score before timer runs out
 
 ## Inspiration
-https://chrome-stats.com/d/com.upstack.arrow.jam.puzzle
-
 https://www.youtube.com/watch?v=iK7b3ehpfKI
 
 ## Sources
+- music: made by PhatPhrogStudio on [pixabay](https://pixabay.com)
 - sound fx: [pixabay](https://pixabay.com)
 - ui elements: [macroquad example](https://github.com/not-fl3/macroquad/tree/master/examples/ui_assets)

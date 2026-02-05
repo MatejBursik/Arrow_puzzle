@@ -1,8 +1,11 @@
 TODO:
-    - add sound background music
     - update ui assets
+    - add a 3 second countdown after pressing oone of the play buttons
+    - add fade-in and fade-out between game states for screen and music
+    - implement math mode (instead of clicking not blocked arrows, player needs to click numbers that add up to the rng number)
     - think about implementing score multiplier (streak, grids completed)
     - think about adding different difficulties
     - add setting:
-        - on/off background music
+        *- on/off background music
+        - change the music and sound fx from on/off to a percentage scale
     

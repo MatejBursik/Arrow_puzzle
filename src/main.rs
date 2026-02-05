@@ -36,10 +36,11 @@ async fn main() {
             }
         }
     };
-    let mut audio: Audio = Audio::new(settings.sound_fx).expect("Failed to initialize audio");
+    let mut audio: Audio = Audio::new(settings.sound_fx, true).expect("Failed to initialize audio");
     let mut sound_fx_input: bool = audio.sound_fx;
 
     let mut game_state = GameState::MainMenu;
+    let mut previous_state = GameState::Settings;
 
     let mut scoreboard: SaveFile = SaveFile { games_saved: Vec::new() };
     let mut grid = generate_grid(GRID_SIZE);
@@ -71,6 +72,23 @@ async fn main() {
         let table_y = screen_h * 0.1;
         let table_width = screen_w - ((screen_w * 0.1) * 2.0);
         let table_height = screen_h - ((screen_h * 0.1) * 2.0);
+
+        // Handle music when state changes
+        if game_state != previous_state {
+            audio.stop_music(); // stop whatever is playing
+
+            match game_state {
+                GameState::MainMenu | GameState::Settings | GameState::Scoreboard => {
+                    audio.start_background_menu_music();
+                }
+
+                GameState::PlayingSurvival | GameState::PlayingTimer => {
+                    audio.start_background_gameplay_music();
+                }
+            }
+
+            previous_state = game_state.clone();
+        }
 
         match game_state {
             GameState::MainMenu => {
