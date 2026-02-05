@@ -69,10 +69,8 @@ impl Audio {
     }
 
     pub fn stop_music(&mut self) {
-        if self.music {
-            if let Some(mut handle) = self.music_handle.take() {
-                let _ = handle.stop(Default::default());
-            }
+        if let Some(mut handle) = self.music_handle.take() {
+            let _ = handle.stop(Default::default());
         }
     }
 }

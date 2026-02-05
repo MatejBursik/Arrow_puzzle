@@ -6,7 +6,8 @@ use std::io::{BufReader, Write, Result};
 pub struct SettingsFile {
     pub player_name: String,
     pub timer_mode_duration: f32,
-    pub sound_fx: bool
+    pub sound_fx: bool,
+    pub music: bool
 }
 
 #[derive(Serialize, Deserialize, Debug)]
